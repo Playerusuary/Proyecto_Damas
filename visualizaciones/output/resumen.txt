@@ -1,0 +1,5 @@
+Dataset: C:\Users\astho\OneDrive\Documentos\Repo_Clon\Proyecto_Damas\backend\data\processed\training_data.csv
+Filas/Columnas: 10130 / 65 (64 features + 1 label)
+Nulos totales: 0
+Valores invalidos en X (no -1/0/1): 0 (filas afectadas: 0)
+Label unicos: [1.0]

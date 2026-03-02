@@ -1,0 +1,5 @@
+metric,value
+invalid_cell_values_total,0.0
+rows_with_invalid_cell_values,0.0
+min_X,-1.0
+max_X,1.0
