@@ -1,0 +1,30 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.proyectodamas.desktop
+productName: Proyecto Damas
+files:
+  - from: dist
+    to: dist
+    filter:
+      - '**/*'
+  - from: ../desktop
+    to: desktop
+    filter:
+      - '**/*'
+  - filter:
+      - package.json
+win:
+  target:
+    - nsis
+  artifactName: Proyecto-Damas-Setup-${version}.${ext}
+extraResources:
+  - from: ../backend/dist/damas-backend.exe
+    to: backend/damas-backend.exe
+  - from: ../backend/models/checkers_model.keras
+    to: backend/checkers_model.keras
+asarUnpack:
+  - '**/*.exe'
+  - '**/*.keras'
+npmRebuild: false
+electronVersion: 35.7.5

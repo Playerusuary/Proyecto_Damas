@@ -2,15 +2,18 @@
     "name": "frontend-damas",
     "private": true,
     "version": "1.0.0",
-    "main": "../desktop/main.cjs",
+    "main": ".desktop-runtime/main.cjs",
     "type": "module",
     "scripts": {
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
+        "prepare:desktop-runtime": "powershell -ExecutionPolicy Bypass -Command \"$dst='.\\\\.desktop-runtime'; if (Test-Path $dst) { Remove-Item -Recurse -Force $dst }; New-Item -ItemType Directory -Path $dst | Out-Null; Copy-Item -Path '..\\\\desktop\\\\*.cjs' -Destination $dst -Force\"",
         "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && cross-env ELECTRON_START_URL=http://localhost:5173 electron .\"",
         "electron:start": "electron .",
-        "build:exe": "npm run build && electron-builder --win"
+        "build:clean": "powershell -ExecutionPolicy Bypass -Command \"$ErrorActionPreference='SilentlyContinue'; taskkill /IM 'Proyecto Damas.exe' /T /F > $null 2>&1; taskkill /IM 'electron.exe' /T /F > $null 2>&1; $out=Join-Path $env:LOCALAPPDATA 'ProyectoDamasBuild'; Start-Sleep -Milliseconds 700; if (Test-Path $out) { Remove-Item -Recurse -Force $out }\"",
+        "build:backend": "powershell -ExecutionPolicy Bypass -File ..\\backend\\build_backend.ps1",
+        "build:exe": "npm run build:clean && npm run build && npm run prepare:desktop-runtime && npm run build:backend && powershell -ExecutionPolicy Bypass -Command \"$out=Join-Path $env:LOCALAPPDATA 'ProyectoDamasBuild'; npx electron-builder --win --config.directories.output=$out\""
     },
     "dependencies": {
         "axios": "^1.6.7",
@@ -32,8 +35,20 @@
             "output": "release"
         },
         "files": [
-            "dist/**/*",
-            "../desktop/**/*",
+            {
+                "from": "dist",
+                "to": "dist",
+                "filter": [
+                    "**/*"
+                ]
+            },
+            {
+                "from": ".desktop-runtime",
+                "to": ".desktop-runtime",
+                "filter": [
+                    "**/*"
+                ]
+            },
             "package.json"
         ],
         "win": {
@@ -41,6 +56,21 @@
                 "nsis"
             ],
             "artifactName": "Proyecto-Damas-Setup-${version}.${ext}"
-        }
+        },
+        "extraResources": [
+            {
+                "from": "../backend/dist/damas-backend.exe",
+                "to": "backend/damas-backend.exe"
+            },
+            {
+                "from": "../backend/models/checkers_model.keras",
+                "to": "backend/checkers_model.keras"
+            }
+        ],
+        "asarUnpack": [
+            "**/*.exe",
+            "**/*.keras"
+        ],
+        "npmRebuild": false
     }
 }

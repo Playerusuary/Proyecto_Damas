@@ -5,6 +5,7 @@ import numpy as np
 import os
 from pydantic import BaseModel
 from typing import List, Union
+import uvicorn
 
 app = FastAPI()
 
@@ -15,7 +16,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "checkers_model.keras")
+DEFAULT_MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "checkers_model.keras")
+MODEL_PATH = os.environ.get("DAMAS_MODEL_PATH", DEFAULT_MODEL_PATH)
 model = tf.keras.models.load_model(MODEL_PATH, compile=False)
 
 
@@ -47,3 +49,7 @@ async def predict_move(payload: Union[List[float], List[List[float]], BoardPaylo
     prediction = model.predict(input_data, verbose=0)
 
     return {"score": float(prediction[0][0])}
+
+
+if __name__ == "__main__":
+    uvicorn.run("src.main:app", host="127.0.0.1", port=8000, reload=False)
