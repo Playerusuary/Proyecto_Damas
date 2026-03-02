@@ -1,20 +1,23 @@
-# Entornos virtuales
-venv/
-.venv/
-env/
-
-# Python
-__pycache__/
+# --- Python ---
+backend/venv/
+backend/__pycache__/
 *.py[cod]
-*$py.class
 
-# Jupyter Notebooks
-.ipynb_checkpoints
+# --- Jupyter Notebooks ---
+.ipynb_checkpoints/
 
-# Node / Vue
-node_modules/
-dist/
-.desktop-runtime/
+# --- Node / Vue ---
+frontend/node_modules/
+frontend/dist/
+frontend/release/
+frontend/.desktop-runtime/
 
-# IDEs
+# --- IDEs & System ---
 .vscode/
+.DS_Store
+Thumbs.db
+
+# --- Build Artifacts ---
+backend/dist/
+backend/build/
+backend/*.spec
