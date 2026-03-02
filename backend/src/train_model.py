@@ -37,8 +37,8 @@ def entrenar_ia():
     # 4. Guardar el modelo entrenado
     models_path = os.path.join(base_path, "..", "models")
     os.makedirs(models_path, exist_ok=True)
-    model.save(os.path.join(models_path, "checkers_model.h5"))
-    print(f"\n¡IA Entrenada! Modelo guardado en: backend/models/checkers_model.h5")
+    model.save(os.path.join(models_path, "checkers_model.keras"))
+    print(f"\n¡IA Entrenada! Modelo guardado en: backend/models/checkers_model.keras")
 
 if __name__ == "__main__":
     entrenar_ia()
