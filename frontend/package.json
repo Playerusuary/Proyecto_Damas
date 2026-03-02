@@ -2,11 +2,15 @@
     "name": "frontend-damas",
     "private": true,
     "version": "1.0.0",
+    "main": "desktop/main.cjs",
     "type": "module",
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && cross-env ELECTRON_START_URL=http://localhost:5173 electron .\"",
+        "electron:start": "electron .",
+        "build:exe": "npm run build && electron-builder --win"
     },
     "dependencies": {
         "axios": "^1.6.7",
@@ -15,6 +19,28 @@
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^5.0.4",
+        "concurrently": "^9.2.1",
+        "cross-env": "^10.1.0",
+        "electron": "^35.0.0",
+        "electron-builder": "^25.1.8",
         "vite": "^5.2.0"
+    },
+    "build": {
+        "appId": "com.proyectodamas.desktop",
+        "productName": "Proyecto Damas",
+        "directories": {
+            "output": "release"
+        },
+        "files": [
+            "dist/**/*",
+            "desktop/**/*",
+            "package.json"
+        ],
+        "win": {
+            "target": [
+                "nsis"
+            ],
+            "artifactName": "Proyecto-Damas-Setup-${version}.${ext}"
+        }
     }
 }

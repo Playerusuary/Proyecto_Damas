@@ -1,12 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import tensorflow as tf
 import numpy as np
 import os
+from pydantic import BaseModel
+from typing import List, Union
 
 app = FastAPI()
 
-# Configuración de CORS para que Vue.js pueda comunicarse con Python
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,22 +15,35 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Cargar la IA al iniciar el servidor
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "checkers_model.keras")
 model = tf.keras.models.load_model(MODEL_PATH, compile=False)
 
+
+class BoardPayload(BaseModel):
+    board: Union[List[float], List[List[float]]]
+
+
 @app.get("/")
 def home():
-    return {"status": "IA de Damas en línea", "modelo": "Cargado correctamente"}
+    return {"status": "IA de Damas en linea", "modelo": "Cargado correctamente"}
+
 
 @app.post("/predict")
-async def predict_move(board_state: list):
-    """
-    Recibe un tablero (lista de 64 números) y devuelve 
-    la evaluación de la IA.
-    """
-    input_data = np.array([board_state])
-    prediction = model.predict(input_data)
-    
-    # La predicción será un valor entre -1 y 1
+async def predict_move(payload: Union[List[float], List[List[float]], BoardPayload]):
+    if isinstance(payload, BoardPayload):
+        board_state = payload.board
+    else:
+        board_state = payload
+
+    flat_board = np.array(board_state, dtype=float).flatten()
+
+    if flat_board.shape[0] != 64:
+        raise HTTPException(
+            status_code=422,
+            detail="El tablero debe contener exactamente 64 valores."
+        )
+
+    input_data = np.array([flat_board])
+    prediction = model.predict(input_data, verbose=0)
+
     return {"score": float(prediction[0][0])}

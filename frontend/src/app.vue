@@ -4,14 +4,14 @@
       <div class="header-controls">
         <button class="help-btn" @click="openChatbot">?</button>
         <div class="scores">
-          <div class="score-box user-box">Tú: {{ userScore }}</div>
+          <div class="score-box user-box">Tu: {{ userScore }}</div>
           <div class="score-box rival-box">Rival: {{ aiScore }}</div>
         </div>
       </div>
       
       <div class="turn-status">
         TURNO DE: <span :class="currentTurn === 'user' ? 'text-green' : 'text-red'">
-          {{ currentTurn === 'user' ? 'TÚ' : 'RIVAL' }}
+          {{ currentTurn === 'user' ? 'TU' : 'RIVAL' }}
         </span>
       </div>
     </header>
@@ -23,7 +23,12 @@
       </div>
 
       <div class="board-container">
-        <Board @piece-captured="incrementScore" @turn-changed="updateTurn" />
+        <Board
+          :current-turn="currentTurn"
+          @piece-captured="incrementScore"
+          @turn-changed="updateTurn"
+          @score-reset="resetScore"
+        />
       </div>
     </main>
 
@@ -48,8 +53,13 @@ const incrementScore = (winner) => {
 };
 
 const updateTurn = (turn) => currentTurn.value = turn;
+const resetScore = () => {
+  userScore.value = 0;
+  aiScore.value = 0;
+  currentTurn.value = 'user';
+};
 
-// Llama a la función de Landbot definida en tu index.html
+// Llama a la funcion de Landbot definida en tu index.html
 const openChatbot = () => {
   if (window.initLandbot) window.initLandbot();
 };
