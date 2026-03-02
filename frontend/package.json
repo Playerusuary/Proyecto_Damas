@@ -13,7 +13,7 @@
         "electron:start": "electron .",
         "build:clean": "powershell -ExecutionPolicy Bypass -Command \"$ErrorActionPreference='SilentlyContinue'; taskkill /IM 'Proyecto Damas.exe' /T /F > $null 2>&1; taskkill /IM 'electron.exe' /T /F > $null 2>&1; $out=Join-Path $env:LOCALAPPDATA 'ProyectoDamasBuild'; Start-Sleep -Milliseconds 700; if (Test-Path $out) { Remove-Item -Recurse -Force $out }\"",
         "build:backend": "powershell -ExecutionPolicy Bypass -File ..\\backend\\build_backend.ps1",
-        "build:exe": "npm run build:clean && npm run build && npm run prepare:desktop-runtime && npm run build:backend && powershell -ExecutionPolicy Bypass -Command \"$out=Join-Path $env:LOCALAPPDATA 'ProyectoDamasBuild'; npx electron-builder --win --config.directories.output=$out\""
+        "build:exe": "npm run build:clean && npm run build && npm run prepare:desktop-runtime && npm run build:backend && powershell -ExecutionPolicy Bypass -Command \"$env:CSC_IDENTITY_AUTO_DISCOVERY='false'; $out=Join-Path $env:LOCALAPPDATA 'ProyectoDamasBuild'; npx electron-builder --win --config.directories.output=$out --config.win.signAndEditExecutable=false\""
     },
     "dependencies": {
         "axios": "^1.6.7",
@@ -55,7 +55,8 @@
             "target": [
                 "nsis"
             ],
-            "artifactName": "Proyecto-Damas-Setup-${version}.${ext}"
+            "artifactName": "Proyecto-Damas-Setup-${version}.${ext}",
+            "signAndEditExecutable": false
         },
         "extraResources": [
             {
