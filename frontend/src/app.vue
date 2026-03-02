@@ -33,7 +33,7 @@
     </main>
 
     <footer class="game-footer">
-      <p>Asthon Sebastian Ramirez Gutierrez | Software Engineering @ Tecmilenio</p>
+      <p>Equipo 6 - Asthon, Eliab y Sebastian | ingenieria en desarollo de software | IA | @Tecmilenio</p>
     </footer>
   </div>
 </template>
@@ -68,7 +68,7 @@ const openChatbot = () => {
 <style scoped>
 .game-wrapper { background-color: #34495e; min-height: 100vh; display: flex; flex-direction: column; align-items: center; color: white; padding: 20px; }
 .header-controls { display: flex; justify-content: space-between; width: 100%; max-width: 600px; margin-bottom: 20px; }
-.help-btn { background-color: #f1c40f; border: none; font-size: 24px; font-weight: bold; width: 45px; height: 45px; cursor: pointer; border-radius: 4px; }
+.help-btn { background-color: #f1c40f; border: none; font-size: 24px; font-weight: bold; width: 45px; height: 45px; cursor: pointer; border-radius: 4px; margin-right: 10px; margin-left: -32px; position: relative; left: -28px; transform: translateX(-36px); }
 .scores { display: flex; gap: 40px; }
 .score-box { padding: 10px 30px; border-radius: 4px; font-weight: bold; min-width: 100px; text-align: center; }
 .user-box { background-color: #2980b9; }

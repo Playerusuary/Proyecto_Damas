@@ -21,7 +21,7 @@ function createWindow() {
     return;
   }
 
-  win.loadFile(path.join(__dirname, "..", "dist", "index.html"));
+  win.loadFile(path.join(__dirname, "..", "frontend", "dist", "index.html"));
 }
 
 app.whenReady().then(() => {
