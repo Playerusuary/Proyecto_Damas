@@ -1,3 +1,16 @@
+/**
+ * desktop/main.cjs
+ *
+ * Electron main process entry.
+ *
+ * Responsabilidades:
+ * - Crear la ventana principal (BrowserWindow) para la UI (Vue/Vite build).
+ * - Levantar el backend de IA (FastAPI) automaticamente:
+ *   - En modo packaged: ejecuta el backend empacado (damas-backend.exe) y apunta al modelo incluido.
+ *   - En modo dev: ejecuta backend/run_backend.py usando el Python del venv si existe.
+ * - Esperar (health check) a que el backend responda antes de abrir la UI.
+ */
+
 const { app, BrowserWindow } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs");
@@ -12,6 +25,7 @@ const BACKEND_PORT = 8000;
 const BACKEND_BASE_URL = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
 
 function requestBackendHealth() {
+  // Consideramos "saludable" cualquier respuesta HTTP (2xx-4xx). Si responde, el proceso esta vivo.
   return new Promise((resolve) => {
     const req = http.get(`${BACKEND_BASE_URL}/`, { timeout: 1200 }, (res) => {
       resolve(res.statusCode >= 200 && res.statusCode < 500);
@@ -27,6 +41,7 @@ function requestBackendHealth() {
 }
 
 async function waitForBackend(maxMs = 20000) {
+  // Polling sencillo: intenta por un maximo de maxMs.
   const start = Date.now();
   while (Date.now() - start < maxMs) {
     const ok = await requestBackendHealth();
@@ -37,6 +52,7 @@ async function waitForBackend(maxMs = 20000) {
 }
 
 function getPackagedBackendConfig() {
+  // En packaged, electron-builder copia extraResources a process.resourcesPath.
   const exePath = path.join(process.resourcesPath, "backend", "damas-backend.exe");
   const modelPath = path.join(process.resourcesPath, "backend", "checkers_model.keras");
   return {
@@ -51,6 +67,7 @@ function getPackagedBackendConfig() {
 }
 
 function getDevBackendConfig() {
+  // En dev, intentamos localizar backend/run_backend.py desde distintas ubicaciones.
   const backendCandidates = [
     path.join(__dirname, "..", "backend"),
     path.join(__dirname, "..", "..", "backend"),
@@ -62,6 +79,7 @@ function getDevBackendConfig() {
   const venvPython = path.join(backendRoot, "venv", "Scripts", "python.exe");
   const systemPython = "python";
 
+  // Preferimos el python del venv para asegurar dependencias (tensorflow/fastapi/etc.).
   const command = fs.existsSync(venvPython) ? venvPython : systemPython;
 
   return {
@@ -73,6 +91,7 @@ function getDevBackendConfig() {
 }
 
 function startBackendProcess() {
+  // Decide config segun app.isPackaged.
   const cfg = app.isPackaged ? getPackagedBackendConfig() : getDevBackendConfig();
 
   backendProcess = spawn(cfg.command, cfg.args, {
@@ -89,6 +108,7 @@ function startBackendProcess() {
 }
 
 function stopBackendProcess() {
+  // Asegura cerrar el backend al salir de la app.
   if (!backendProcess || backendProcess.killed) return;
 
   try {
@@ -106,6 +126,7 @@ function stopBackendProcess() {
 }
 
 function createWindow() {
+  // Ventana principal (UI). No se habilita Node.js en renderer por seguridad.
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 900,
@@ -121,15 +142,18 @@ function createWindow() {
 
   const devUrl = process.env.ELECTRON_START_URL;
   if (devUrl) {
+    // electron:dev: se carga la URL del servidor Vite.
     mainWindow.loadURL(devUrl);
     return;
   }
 
   if (app.isPackaged) {
+    // Packaged: se carga el build de Vite desde dist/.
     mainWindow.loadFile(path.join(__dirname, "..", "dist", "index.html"));
     return;
   }
 
+  // Fallback dev: intenta cargar dist/ si existe.
   const devIndexCandidates = [
     path.join(__dirname, "..", "dist", "index.html"),
     path.join(__dirname, "..", "frontend", "dist", "index.html"),

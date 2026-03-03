@@ -1,3 +1,19 @@
+/**
+ * frontend/src/game/rules.js
+ *
+ * Reglas y logica del juego de damas (movimientos, capturas, promociones, empate).
+ *
+ * Este modulo es el "motor" del juego en el frontend:
+ * - Calcula movimientos simples y de captura (incluyendo reyes con movimiento diagonal largo)
+ * - Aplica movimientos al estado del tablero
+ * - Detecta ganador/empate
+ * - Calcula endpoints posibles para cadenas de captura (para resaltar casillas en UI)
+ *
+ * Se apoya en:
+ * - constants.js: codigos de piezas/board size
+ * - helpers.js: helpers puros (clonado, validaciones, etc.)
+ */
+
 import {
   BOARD_SIZE,
   PLAYER_MAN,
@@ -19,6 +35,7 @@ import {
 } from './helpers';
 
 export const createInitialBoard = () => ([
+  // Matriz 8x8. Solo casillas oscuras se usan para piezas.
   [EMPTY, AI_MAN, EMPTY, AI_MAN, EMPTY, AI_MAN, EMPTY, AI_MAN],
   [AI_MAN, EMPTY, AI_MAN, EMPTY, AI_MAN, EMPTY, AI_MAN, EMPTY],
   [EMPTY, AI_MAN, EMPTY, AI_MAN, EMPTY, AI_MAN, EMPTY, AI_MAN],
@@ -30,6 +47,9 @@ export const createInitialBoard = () => ([
 ]);
 
 export const getDirections = (piece) => {
+  // Direcciones diagonales:
+  // - Peon: depende del color/lado (solo "hacia adelante")
+  // - Rey: 4 diagonales
   if (piece === PLAYER_KING || piece === AI_KING) {
     return [[-1, -1], [-1, 1], [1, -1], [1, 1]];
   }
@@ -45,6 +65,7 @@ export const getPieceCaptureMoves = (state, r, c) => {
   const directions = getDirections(piece);
 
   if (isKing(piece)) {
+    // Rey: puede recorrer diagonales hasta encontrar un enemigo y capturar si hay aterrizaje valido.
     for (const [dr, dc] of directions) {
       let row = r + dr;
       let col = c + dc;
@@ -139,6 +160,7 @@ export const getPieceSimpleMoves = (state, r, c) => {
   const directions = getDirections(piece);
 
   if (isKing(piece)) {
+    // Rey: movimiento diagonal largo mientras la casilla este vacia.
     for (const [dr, dc] of directions) {
       let toR = r + dr;
       let toC = c + dc;
@@ -199,6 +221,7 @@ export const getAllLegalMoves = (state, side, forcedPiece = null, forceCaptureOn
 };
 
 export const applyMove = (state, move) => {
+  // Aplica un movimiento (mutando el tablero) y retorna flags para UI/turnos.
   const piece = state[move.fromR][move.fromC];
   state[move.fromR][move.fromC] = EMPTY;
   state[move.toR][move.toC] = piece;
@@ -211,6 +234,7 @@ export const applyMove = (state, move) => {
 
   let promoted = false;
   if (piece === PLAYER_MAN && move.toR === 0) {
+    // Promocion a rey cuando el peon alcanza la ultima fila del oponente.
     state[move.toR][move.toC] = PLAYER_KING;
     promoted = true;
   }

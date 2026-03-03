@@ -1,3 +1,24 @@
+"""
+training_curves.py
+
+Objetivo
+- Generar evidencia para el reporte: curvas de aprendizaje (train vs validation)
+  del modelo supervisado de damas.
+
+Que hace
+- Lee: backend/data/processed/training_data.csv
+  - 64 columnas de features (tablero 8x8 aplanado)
+  - 1 columna final (label y)
+- Entrena el mismo modelo/hyperparametros definidos en backend/src/train_model.py
+- Guarda:
+  - visualizaciones/output/figuras/curvas_entrenamiento.png
+  - visualizaciones/output/tablas/curvas_entrenamiento_history.csv
+
+Notas
+- Este script vive fuera del core del juego para no mezclar "producto" con "evidencias".
+- Debe ejecutarse con el Python del venv del backend si TensorFlow no esta instalado globalmente.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -9,6 +30,8 @@ import pandas as pd
 
 
 def try_import_tensorflow():
+    # Import perezoso (lazy import) para que el script pueda mostrar un error claro
+    # si TensorFlow no esta instalado en el interprete actual.
     try:
         import tensorflow as tf  # noqa: F401
         from tensorflow.keras import layers, models  # noqa: F401
@@ -20,6 +43,7 @@ def try_import_tensorflow():
 
 @dataclass(frozen=True)
 class TrainConfig:
+    # Hiperparametros usados por default (alineados con backend/src/train_model.py).
     epochs: int = 20
     batch_size: int = 32
     val_ratio: float = 0.2
@@ -27,6 +51,7 @@ class TrainConfig:
 
 
 def build_model():
+    # Arquitectura MLP (Dense) para predecir un "score" del tablero.
     import tensorflow as tf
     from tensorflow.keras import layers, models
 
@@ -45,6 +70,7 @@ def build_model():
 
 
 def split_train_val(x: np.ndarray, y: np.ndarray, val_ratio: float, seed: int):
+    # Split reproducible para poder reportar resultados consistentes.
     rng = np.random.default_rng(seed)
     idx = np.arange(x.shape[0])
     rng.shuffle(idx)
@@ -55,6 +81,9 @@ def split_train_val(x: np.ndarray, y: np.ndarray, val_ratio: float, seed: int):
 
 
 def plot_curves(history_df: pd.DataFrame, out_png: Path) -> None:
+    # Grafica 2 subplots:
+    # - Loss (MSE): train vs val
+    # - MAE: train vs val
     import matplotlib
 
     matplotlib.use("Agg")
@@ -85,6 +114,7 @@ def plot_curves(history_df: pd.DataFrame, out_png: Path) -> None:
 
 
 def main() -> None:
+    # CLI simple para ajustar hyperparametros sin editar codigo.
     parser = argparse.ArgumentParser(description="Genera curvas de entrenamiento/validacion para el modelo de damas.")
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--batch-size", type=int, default=32)
@@ -111,6 +141,7 @@ def main() -> None:
     tab_dir.mkdir(parents=True, exist_ok=True)
 
     df = pd.read_csv(csv_path)
+    # Convencion del proyecto: primeras 64 columnas = X, ultima columna = y (label).
     x = df.iloc[:, :-1].values.astype(np.float32)
     y = df.iloc[:, -1].values.astype(np.float32)
 
@@ -126,6 +157,7 @@ def main() -> None:
         verbose=1,
     )
 
+    # history.history contiene series por epoch: loss/mae y val_loss/val_mae.
     hist = pd.DataFrame(history.history)
     hist.insert(0, "epoch", np.arange(1, len(hist) + 1))
     hist.to_csv(tab_dir / "curvas_entrenamiento_history.csv", index=False)
@@ -137,4 +169,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

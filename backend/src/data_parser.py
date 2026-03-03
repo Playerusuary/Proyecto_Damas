@@ -1,3 +1,20 @@
+"""
+backend/src/data_parser.py
+
+Parser PDN (Portable Draughts Notation) para construir el dataset supervisado.
+
+Entrada:
+- backend/data/raw/*.pdn
+
+Salida:
+- backend/data/processed/training_data.csv
+  - 64 columnas: tablero 8x8 aplanado
+  - 1 columna final: label (resultado supervisado)
+
+Notas:
+- Usa un motor simplificado (backend/src/engine.py) para actualizar la matriz con movimientos PDN.
+"""
+
 import os
 import re
 import pandas as pd
@@ -8,6 +25,9 @@ class PDNParser:
         self.raw_data_path = raw_data_path
 
     def leer_archivo(self, filename):
+        # Lee un .pdn y extrae:
+        # - [Result "..."]
+        # - Movimientos "a-b" (desplazamiento) y "axb" (captura)
         ruta_completa = os.path.join(self.raw_data_path, filename)
         with open(ruta_completa, 'r') as file:
             contenido = file.read()
@@ -20,12 +40,16 @@ class PDNParser:
             }
         
     def generar_dataset_entrenamiento(self, data, engine):
+        # Genera ejemplos supervisados guardando una "foto" del tablero antes de cada movimiento.
         dataset = []
         engine.reset_board() # Reiniciamos el tablero a la posición inicial
         
         for move in data['movimientos']:
             # 1. Tomamos la "foto" actual del tablero (64 casillas)
             estado_actual = engine.board.flatten().tolist()
+
+            # Etiquetado (label) del ejemplo.
+            # Importante: la varianza/calidad del dataset depende directamente de esta regla.
             
             # 2. Definimos la etiqueta según el resultado de la partida
             label = 1 if data['resultado'] == "2-0" else -1

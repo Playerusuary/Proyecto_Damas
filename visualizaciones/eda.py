@@ -1,3 +1,22 @@
+"""
+eda.py
+
+Script de EDA (Analisis Exploratorio de Datos) para el proyecto de Damas.
+
+Entrada
+- backend/data/processed/training_data.csv
+  - 64 columnas: tablero (8x8 aplanado)
+  - 1 columna final: label/etiqueta (resultado supervisado)
+
+Salida (evidencias para el reporte)
+- visualizaciones/output/figuras/*.png
+- visualizaciones/output/tablas/*.csv
+- visualizaciones/output/resumen.txt
+- visualizaciones/output/report.md
+
+Nota: Este script solo lee datos y genera graficas/tablas; no modifica el modelo ni la app.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -13,16 +32,19 @@ import seaborn as sns
 
 
 def ensure_dir(path: Path) -> None:
+    # Crea la carpeta si no existe (idempotente).
     path.mkdir(parents=True, exist_ok=True)
 
 
 def save_fig(path: Path) -> None:
+    # Guardado consistente para todas las figuras (dpi y cierre de figura).
     plt.tight_layout()
     plt.savefig(path, dpi=180)
     plt.close()
 
 
 def main() -> None:
+    # Resolvemos rutas relativas al repo para que el script funcione desde cualquier cwd.
     repo_root = Path(__file__).resolve().parent.parent
     csv_path = repo_root / "backend" / "data" / "processed" / "training_data.csv"
     out_root = Path(__file__).resolve().parent / "output"
@@ -52,6 +74,7 @@ def main() -> None:
     y = df.iloc[:, -1]
 
     # --- Estadisticas descriptivas ---
+    # Resumen estadistico por feature (casilla). Agregamos la mediana por claridad.
     desc = x.describe().T
     desc["median"] = x.median(numeric_only=True)
     desc.to_csv(tab_dir / "estadisticas_descriptivas_X.csv")
@@ -60,6 +83,7 @@ def main() -> None:
     label_desc.to_csv(tab_dir / "estadisticas_descriptivas_y.csv", header=["value"])
 
     # --- Nulos / faltantes ---
+    # Sirve para detectar filas/columnas incompletas por parseo o datos faltantes.
     nulls = df.isna().sum().rename("null_count")
     nulls.to_csv(tab_dir / "valores_nulos_por_columna.csv")
 
@@ -71,6 +95,7 @@ def main() -> None:
     save_fig(fig_dir / "nulos_resumen.png")
 
     # --- Distribucion de etiquetas ---
+    # Si la etiqueta tiene poca varianza, esta grafica sera trivial (poca informacion).
     plt.figure(figsize=(7, 4))
     y.value_counts().sort_index().plot(kind="bar", color="#34495e")
     plt.title("Distribucion de la etiqueta (y)")

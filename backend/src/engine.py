@@ -1,3 +1,21 @@
+"""
+backend/src/engine.py
+
+Motor de tablero simplificado para apoyar la generacion del dataset (parser PDN).
+
+Responsabilidad
+- Mantener una matriz 8x8 con valores:
+  - 1  = jugador
+  - -1 = IA
+  - 0  = vacio
+- Traducir movimientos PDN (1-32) a coordenadas (fila, columna)
+- Aplicar movimientos basicos y capturas simples ("x")
+
+Nota
+- Este motor NO implementa toda la logica del juego (reyes, multiples capturas, etc.).
+  La logica completa del juego esta en el frontend (frontend/src/game/*).
+"""
+
 import numpy as np
 
 class CheckersEngine:
