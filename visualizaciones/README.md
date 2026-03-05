@@ -30,3 +30,17 @@ backend\venv\Scripts\python.exe visualizaciones\training_curves.py
 Salida:
 - `visualizaciones/output/figuras/curvas_entrenamiento.png`
 - `visualizaciones/output/tablas/curvas_entrenamiento_history.csv`
+
+## Metricas Rival (IA vs Rival / Self-Play)
+Para cumplir el punto de "Resultados y Evaluacion" con metricas adicionales tipo win-rate y
+precision/recall/F1 (sobre prediccion de ganador final usando el score), se incluye:
+
+```powershell
+backend\venv\Scripts\python.exe visualizaciones\rival_eval.py --games 50
+```
+
+Salida:
+- Logs (solo evidencia): `backend/data/rival/`
+- Tablas y figuras para el reporte: `visualizaciones/output/`
+  - Tablas: `output/tablas/rival_metrics.csv`, `output/tablas/rival_matches.csv`, etc.
+  - Figuras: `output/figuras/rival_resultados.png`, `output/figuras/rival_confusion_matrix.png`, etc.

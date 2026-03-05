@@ -1,0 +1,2 @@
+games,wins_ai,wins_player,draws,win_rate_ai_no_draw,loss_rate_ai_no_draw,draw_rate_overall,avg_plies,avg_captures,avg_promotions,epsilon,max_plies,seed,class_accuracy,class_precision,class_recall,class_f1,class_tp,class_tn,class_fp,class_fn,class_n_states
+20.0,10.0,10.0,0.0,0.5,0.5,0.0,51.05,18.95,2.4,0.05,220.0,42.0,0.4515463917525773,0.4515463917525773,1.0,0.6221590909090909,438.0,0.0,532.0,0.0,970.0
